@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="kk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Информатика / бағдарламалау тесті</title>
+    <style>
+      :root {
+        --bg: #fdf2f8;
+        --white: #ffffff;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --pink: #db2777;
+        --pink-dark: #be185d;
+        --pink-light: #fce7f3;
+        --pink-border: #f9a8d4;
+        --timer: #fb923c;
+        --green: #16a34a;
+        --green-bg: #dcfce7;
+        --red: #dc2626;
+        --red-bg: #fee2e2;
+        --radius: 14px;
+        --shadow: 0 12px 40px rgba(219, 39, 119, 0.08);
+        --font: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; font-family: var(--font); color: var(--text); background: var(--bg); }
+      [hidden] { display: none !important; }
+      .lang-switch {
+        position: fixed; top: 16px; right: 20px; z-index: 100;
+        display: flex; align-items: center; gap: 4px;
+        background: var(--white); padding: 6px 12px; border-radius: 999px;
+        border: 1px solid var(--pink-border); box-shadow: 0 2px 12px rgba(0,0,0,.06);
+      }
+      .lang-btn {
+        border: none; background: transparent; font: inherit; font-weight: 700;
+        cursor: pointer; color: var(--muted); padding: 4px 10px; border-radius: 999px;
+      }
+      .lang-btn.active { background: var(--pink-light); color: var(--pink-dark); }
+      .lang-sep { color: var(--muted); }
+      .screen { min-height: 100vh; display: none; }
+      .screen.active { display: block; }
+
+      /* Welcome */
+      .screen-welcome { padding: 72px 20px 40px; }
+      .welcome-shell {
+        max-width: 980px; margin: 0 auto;
+        background: var(--white); border-radius: var(--radius);
+        box-shadow: var(--shadow); border: 1px solid #fce7f3;
+        border-left: 5px solid var(--pink);
+        display: grid; grid-template-columns: 1fr 1fr; overflow: hidden;
+      }
+      .welcome-left { padding: 36px 32px 40px; }
+      .welcome-title { margin: 0 0 8px; font-size: clamp(1.4rem, 3vw, 1.85rem); color: var(--pink); font-weight: 800; line-height: 1.25; }
+      .welcome-sub { margin: 0 0 24px; color: var(--muted); line-height: 1.5; font-size: 0.95rem; }
+      .form-start { display: flex; flex-direction: column; gap: 16px; }
+      .field { display: flex; flex-direction: column; gap: 6px; }
+      .field-label { font-weight: 600; font-size: 0.9rem; }
+      .field input, .field select {
+        font: inherit; padding: 12px 14px; border-radius: 10px;
+        border: 1px solid #e5e7eb; background: #fff; width: 100%;
+      }
+      .field input:focus, .field select:focus {
+        outline: 2px solid rgba(219,39,119,.25); border-color: var(--pink);
+      }
+      .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .form-error { margin: 0; color: var(--red); font-size: 0.88rem; }
+      .btn {
+        font: inherit; font-weight: 700; cursor: pointer; border: none;
+        border-radius: 10px; padding: 13px 22px; transition: .15s;
+      }
+      .btn-primary { background: var(--pink); color: #fff; }
+      .btn-primary:hover { background: var(--pink-dark); }
+      .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+      .btn-block { width: 100%; margin-top: 4px; }
+      .btn-outline {
+        background: #fff; color: var(--pink); border: 2px solid var(--pink);
+      }
+      .btn-outline:hover { background: var(--pink-light); }
+      .btn-ghost { background: #fff; color: var(--pink); border: 2px solid var(--pink-border); }
+      .btn-ghost:disabled { opacity: .45; cursor: not-allowed; }
+      .btn-home {
+        background: var(--pink); color: #fff; padding: 14px 32px;
+        border-radius: 12px; font-size: 1rem;
+      }
+      .welcome-right {
+        background: linear-gradient(145deg, #fce7f3 0%, #fbcfe8 50%, #f9a8d4 100%);
+        display: flex; align-items: center; justify-content: center; padding: 24px; min-height: 320px;
+      }
+      .hero-art {
+        width: 100%; max-width: 280px; aspect-ratio: 3/4; border-radius: 16px;
+        background: linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,.1));
+        border: 2px solid rgba(255,255,255,.5);
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        text-align: center; padding: 20px; color: var(--pink-dark);
+      }
+      .hero-art svg { width: 120px; height: 120px; margin-bottom: 12px; opacity: .9; }
+
+      /* Quiz */
+      .screen-quiz { padding: 64px 20px 32px; }
+      .quiz-wrap { max-width: 900px; margin: 0 auto; }
+      .quiz-header {
+        display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+        gap: 12px; margin-bottom: 20px;
+      }
+      .student-block { display: flex; align-items: center; gap: 10px; }
+      .avatar {
+        width: 40px; height: 40px; border-radius: 50%;
+        background: var(--pink-light); color: var(--pink);
+        display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: .85rem;
+      }
+      .student-name { font-weight: 700; font-size: .95rem; }
+      .student-meta { font-size: .8rem; color: var(--muted); }
+      .hdr-spec-title {
+        text-align: center; font-size: .82rem; font-weight: 600; color: var(--muted);
+        line-height: 1.3; max-width: 220px; justify-self: center;
+      }
+      .timer-box {
+        justify-self: end;
+        background: #fff7ed; border: 1px solid #fed7aa;
+        color: #c2410c; font-weight: 800; font-variant-numeric: tabular-nums;
+        padding: 8px 14px; border-radius: 10px; font-size: .95rem;
+      }
+      .timer-box.warn { animation: pulse .9s ease-in-out infinite; }
+      @keyframes pulse { 50% { filter: brightness(1.08); } }
+      .btn-logout {
+        justify-self: end; background: transparent; border: none;
+        color: var(--muted); font: inherit; font-size: .85rem; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 6px;
+      }
+      .btn-logout:hover { color: var(--pink); }
+      .progress-head {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 8px; font-weight: 700; color: var(--pink); font-size: .95rem;
+      }
+      .progress-track {
+        height: 8px; background: #fce7f3; border-radius: 999px; overflow: hidden; margin-bottom: 20px;
+      }
+      .progress-fill {
+        height: 100%; background: linear-gradient(90deg, var(--pink), #f472b6);
+        border-radius: 999px; transition: width .25s ease; width: 5%;
+      }
+      .question-card {
+        background: var(--white); border-radius: var(--radius); padding: 28px 24px;
+        box-shadow: var(--shadow); border: 1px solid #fce7f3;
+      }
+      .question-text { margin: 0 0 20px; font-size: 1.1rem; line-height: 1.5; font-weight: 700; }
+      .options { display: flex; flex-direction: column; gap: 10px; }
+      .option {
+        display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px;
+        border: 1px solid #e5e7eb; border-radius: 10px; cursor: pointer; transition: .15s;
+      }
+      .option:hover { border-color: var(--pink-border); }
+      .option.selected { border-color: var(--pink); background: var(--pink-light); box-shadow: 0 0 0 1px var(--pink); }
+      .option input { margin-top: 3px; accent-color: var(--pink); }
+      .option span { flex: 1; line-height: 1.45; }
+      .quiz-nav { display: flex; justify-content: space-between; margin-top: 22px; gap: 12px; }
+
+      /* Results */
+      .screen-results { padding: 64px 20px 48px; }
+      .results-wrap { max-width: 720px; margin: 0 auto; }
+      .results-top {
+        display: flex; justify-content: space-between; align-items: flex-start;
+        margin-bottom: 20px; gap: 12px;
+      }
+      .summary-card {
+        background: var(--white); border-radius: var(--radius); padding: 32px 28px;
+        box-shadow: var(--shadow); border: 1px solid #fce7f3; text-align: center; margin-bottom: 24px;
+      }
+      .result-icon {
+        width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 16px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.75rem; font-weight: 800; color: #fff;
+      }
+      .result-icon.pass { background: var(--green); }
+      .result-icon.fail { background: var(--red); }
+      .results-title { margin: 0 0 8px; font-size: 1.35rem; font-weight: 800; }
+      .results-sub { margin: 0 0 20px; color: var(--muted); line-height: 1.5; font-size: .92rem; }
+      .score-line { font-size: 1.75rem; font-weight: 800; margin-bottom: 8px; }
+      .score-line.fail { color: var(--red); }
+      .score-line.pass { color: var(--green); }
+      .ratio-line { color: var(--muted); font-weight: 600; }
+      .review-title {
+        display: flex; align-items: center; gap: 8px;
+        font-weight: 700; margin-bottom: 14px; color: var(--red); font-size: .95rem;
+      }
+      .review-card {
+        background: var(--white); border-radius: var(--radius); padding: 20px;
+        border: 1px solid #fce7f3; margin-bottom: 14px; box-shadow: 0 4px 16px rgba(0,0,0,.04);
+      }
+      .review-head {
+        display: flex; justify-content: space-between; margin-bottom: 10px;
+        font-size: .75rem; font-weight: 800; letter-spacing: .04em; color: var(--muted);
+      }
+      .review-q { margin: 0 0 14px; font-weight: 700; line-height: 1.45; }
+      .ans-box {
+        padding: 12px 14px; border-radius: 10px; margin-bottom: 8px; font-size: .9rem; line-height: 1.4;
+      }
+      .ans-wrong { background: var(--red-bg); border: 1px solid #fecaca; }
+      .ans-correct { background: var(--green-bg); border: 1px solid #bbf7d0; }
+      .ans-label { font-size: .7rem; font-weight: 800; letter-spacing: .03em; margin-bottom: 4px; display: block; }
+      .ans-wrong .ans-label { color: var(--red); }
+      .ans-correct .ans-label { color: var(--green); }
+      .results-footer { text-align: center; margin-top: 28px; }
+      .review-empty { color: var(--muted); text-align: center; padding: 20px; }
+
+      @media (max-width: 768px) {
+        .welcome-shell { grid-template-columns: 1fr; }
+        .welcome-right { min-height: 200px; order: -1; }
+        .quiz-header { grid-template-columns: 1fr; }
+        .hdr-spec-title { text-align: left; max-width: none; }
+        .timer-box, .btn-logout { justify-self: start; }
+        .field-row { grid-template-columns: 1fr; }
+        .quiz-nav { flex-direction: column-reverse; }
+        .quiz-nav .btn { width: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="lang-switch" id="lang-switch" aria-label="Тіл">
+      <button type="button" data-lang="kz" class="lang-btn active">KZ</button>
+      <span class="lang-sep">/</span>
+      <button type="button" data-lang="ru" class="lang-btn">RU</button>
+    </div>
+
+    <main class="screen screen-welcome active" id="screen-welcome">
+      <div class="welcome-shell">
+        <div class="welcome-left">
+          <h1 class="welcome-title" data-i18n="welcomeTitle">Информатика / бағдарламалау тесті</h1>
+          <p class="welcome-sub" data-i18n="welcomeSub">Университет студенттеріне арналған онлайн емтихан</p>
+          <form id="form-start" class="form-start" novalidate>
+            <label class="field">
+              <span class="field-label" data-i18n="labelName">Толық аты-жөні</span>
+              <input type="text" id="input-name" required placeholder="Ахметов Азамат" data-i18n-placeholder="phName" />
+            </label>
+            <div class="field-row">
+              <label class="field">
+                <span class="field-label" data-i18n="labelGroup">Топ</span>
+                <select id="select-group" required><option value="" data-i18n="phGroup">Таңдаңыз...</option></select>
+              </label>
+              <label class="field">
+                <span class="field-label" data-i18n="labelCourse">Курс</span>
+                <select id="select-course" required><option value="" data-i18n="phCourse">Таңдаңыз...</option></select>
+              </label>
+            </div>
+            <label class="field">
+              <span class="field-label" data-i18n="labelSpec">Мамандық</span>
+              <select id="select-spec" required><option value="" data-i18n="phSpec">Таңдаңыз...</option></select>
+            </label>
+            <p class="form-error" id="form-error" role="alert" hidden></p>
+            <button type="submit" class="btn btn-primary btn-block" data-i18n="btnStart">Тестті бастау</button>
+          </form>
+        </div>
+        <div class="welcome-right" aria-hidden="true">
+          <div class="hero-art">
+            <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="60" cy="45" r="28" fill="#fbcfe8" stroke="#db2777" stroke-width="2"/>
+              <rect x="35" y="78" width="50" height="30" rx="8" fill="#f9a8d4"/>
+              <circle cx="50" cy="42" r="4" fill="#db2777"/><circle cx="70" cy="42" r="4" fill="#db2777"/>
+              <path d="M48 52 Q60 60 72 52" stroke="#db2777" stroke-width="2" fill="none"/>
+            </svg>
+            <strong>IT Test</strong>
+            <small style="margin-top:6px;opacity:.8">1–3 курс</small>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <main class="screen screen-quiz" id="screen-quiz" hidden>
+      <div class="quiz-wrap">
+        <header class="quiz-header">
+          <div class="student-block">
+            <div class="avatar" id="avatar-initials">АА</div>
+            <div>
+              <div class="student-name" id="hdr-name"></div>
+              <div class="student-meta" id="hdr-meta"></div>
+            </div>
+          </div>
+          <div class="hdr-spec-title" id="hdr-spec"></div>
+          <div class="timer-box" id="timer-box"><span id="timer-display">40:00</span></div>
+        </header>
+        <div class="progress-head">
+          <span><span data-i18n="questionWord">Сұрақ</span> <span id="q-current">1</span> / <span id="q-total">20</span></span>
+          <span id="progress-pct">5% аяқталды</span>
+        </div>
+        <div class="progress-track" role="progressbar"><div class="progress-fill" id="progress-fill"></div></div>
+        <section class="question-card">
+          <h2 class="question-text" id="question-text"></h2>
+          <div class="options" id="options-root"></div>
+        </section>
+        <footer class="quiz-nav">
+          <button type="button" class="btn btn-ghost" id="btn-back" data-i18n="btnBack">Артқа</button>
+          <button type="button" class="btn btn-primary" id="btn-next" data-i18n="btnNext">Келесі</button>
+        </footer>
+      </div>
+    </main>
+
+    <main class="screen screen-results" id="screen-results" hidden>
+      <div class="results-wrap">
+        <div class="results-top">
+          <div class="student-block">
+            <div class="avatar" id="res-avatar">АА</div>
+            <div>
+              <div class="student-name" id="res-name"></div>
+              <div class="student-meta" id="res-meta"></div>
+            </div>
+          </div>
+          <button type="button" class="btn-logout" id="btn-logout" data-i18n="btnLogout">Жүйеден шығу</button>
+        </div>
+        <div class="summary-card">
+          <div class="result-icon fail" id="result-icon">✕</div>
+          <h2 class="results-title" id="result-title" data-i18n="resultFail">Тесттен өтпедіңіз</h2>
+          <p class="results-sub" id="result-sub" data-i18n="resultFailSub">Келесі жолы сәттілік тілейміз. Қателермен жұмыс жасаңыз.</p>
+          <p class="score-line fail" id="score-big">0 / 100</p>
+          <p class="ratio-line" id="ratio-line">Дұрыс / Қате 0 / 20</p>
+        </div>
+        <h3 class="review-title" id="review-block-title" hidden>
+          <span aria-hidden="true">ⓘ</span>
+          <span data-i18n="reviewTitle">Қате берілген жауаптарды талдау</span>
+        </h3>
+        <div id="review-list"></div>
+        <div class="results-footer">
+          <button type="button" class="btn btn-home" id="btn-home" data-i18n="btnHome">Негізгі бетке оралу</button>
+        </div>
+      </div>
+    </main>
+
+    <script>
+    /* === Сұрақтар банкі (100) — серверсіз, fetch жоқ === */
+    (function () {
+      const staticBank = [
+        { text_kz: "Информатикада ақпараттың ең кіші өлшем бірлігі қандай?", text_ru: "Какова наименьшая единица измерения информации?", options_kz: ["Бит", "Байт", "Мегабайт", "Килобайт", "Пиксель"], options_ru: ["Бит", "Байт", "Мегабайт", "Килобайт", "Пиксель"], correct: 0 },
+        { text_kz: "1 байт неше биттен тұрады?", text_ru: "Сколько бит в одном байте?", options_kz: ["4", "8", "16", "32", "64"], options_ru: ["4", "8", "16", "32", "64"], correct: 1 },
+        { text_kz: "HTML құжатындағы тақырып үшін қай тег?", text_ru: "Какой тег для заголовка страницы в HTML?", options_kz: ["<header>", "<title>", "<h1>", "<meta>", "<head>"], options_ru: ["<header>", "<title>", "<h1>", "<meta>", "<head>"], correct: 1 },
+        { text_kz: "CSS-те мәтін түсі қай қасиетпен?", text_ru: "Какое свойство CSS задаёт цвет текста?", options_kz: ["background-color", "font-color", "color", "text-style", "fill"], options_ru: ["background-color", "font-color", "color", "text-style", "fill"], correct: 2 },
+        { text_kz: "DOM (Document Object Model) дегеніміз не?", text_ru: "Что такое DOM?", options_kz: ["HTML құжатымен жұмыс істеуге арналған бағдарламалау интерфейсі", "Тек сервер", "Тек база", "Тек CSS файл", "Тек браузер атауы"], options_ru: ["Интерфейс для работы с HTML-документом", "Только сервер", "Только БД", "Только CSS", "Только имя браузера"], correct: 0 },
+        { text_kz: "CSS flex-direction: column не істейді?", text_ru: "Что делает flex-direction: column?", options_kz: ["Элементтерді көлденең қатарға қояды", "Элементтерді тігінен (баған бойынша) қояды", "Түсті өзгертеді", "Шрифтті үлкейтеді", "Желіні өшіреді"], options_ru: ["Располагает элементы горизонтально", "Располагает элементы вертикально (в колонку)", "Меняет цвет", "Увеличивает шрифт", "Отключает сеть"], correct: 1 },
+        { text_kz: "JavaScript-те айнымалы жариялауға қолданылмайтын сөз?", text_ru: "Какое слово НЕ используется для объявления переменной в JS?", options_kz: ["var", "let", "const", "def", "function"], options_ru: ["var", "let", "const", "def", "function"], correct: 3 },
+        { text_kz: "HTTP және HTTPS айырмашылығы?", text_ru: "Отличие HTTP от HTTPS?", options_kz: ["Түс", "Шифрлау / қауіпсіздік", "Файл форматы", "Жылдамдық ғана", "Принтер"], options_ru: ["Цвет", "Шифрование / безопасность", "Формат файла", "Только скорость", "Принтер"], correct: 1 },
+        { text_kz: "IPv4 мекенжайында неше бит?", text_ru: "Сколько бит в IPv4?", options_kz: ["16", "32", "64", "128", "256"], options_ru: ["16", "32", "64", "128", "256"], correct: 1 },
+        { text_kz: "LIFO принципі қай құрылымда?", text_ru: "Где используется LIFO?", options_kz: ["Кезек", "Стек", "Кесте", "Граф", "Файл"], options_ru: ["Очередь", "Стек", "Таблица", "Граф", "Файл"], correct: 1 },
+        { text_kz: "1010₂ ондық жүйеде:", text_ru: "1010₂ в десятичной системе:", options_kz: ["8", "10", "12", "14", "16"], options_ru: ["8", "10", "12", "14", "16"], correct: 1 },
+        { text_kz: "SQL-де барлық бағандарды таңдау:", text_ru: "Выбор всех столбцов в SQL:", options_kz: ["GET *", "SELECT ALL", "SELECT *", "FETCH *", "READ *"], options_ru: ["GET *", "SELECT ALL", "SELECT *", "FETCH *", "READ *"], correct: 2 },
+        { text_kz: "ОЖ ядросы не істейді?", text_ru: "Что делает ядро ОС?", options_kz: ["Тек мәтін", "Ресурстар мен үдерістерді басқару", "Тек браузер", "Тек сурет", "Тек дыбыс"], options_ru: ["Только текст", "Управляет ресурсами и процессами", "Только браузер", "Только рисунок", "Только звук"], correct: 1 },
+        { text_kz: "O(n) күрделілігі:", text_ru: "Сложность O(n):", options_kz: ["Тұрақты", "Сызықтық", "Квадраттық", "Логарифмдік", "Экспоненциалды"], options_ru: ["Постоянная", "Линейная", "Квадратичная", "Логарифмическая", "Экспоненциальная"], correct: 1 },
+        { text_kz: "JSON не үшін қолданылады?", text_ru: "Для чего используется JSON?", options_kz: ["Бейне", "Деректер алмасу", "Дизайн", "Кабель", "Драйвер"], options_ru: ["Видео", "Обмен данными", "Дизайн", "Кабель", "Драйвер"], correct: 1 },
+        { text_kz: "DNS не үшін?", text_ru: "Для чего DNS?", options_kz: ["Домен → IP", "Сығу", "Вирус", "Кесте", "CSS"], options_ru: ["Домен → IP", "Сжатие", "Вирус", "Таблица", "CSS"], correct: 0 },
+        { text_kz: "Git commit не істейді?", text_ru: "Что делает git commit?", options_kz: ["Push", "Clone", "Локальді сақтау", "Fork", "Zip"], options_ru: ["Push", "Clone", "Локальное сохранение", "Fork", "Zip"], correct: 2 },
+        { text_kz: "Реляциялық БД-де кестелерді байланыстыру:", text_ru: "Связь таблиц в РБД:", options_kz: ["Кілттер", "Пиксель", "CSS", "Cookie", "SVG"], options_ru: ["Ключи", "Пиксель", "CSS", "Cookie", "SVG"], correct: 0 },
+        { text_kz: "TCP сенімді жеткізу:", text_ru: "TCP обеспечивает:", options_kz: ["Әрқашан жылдам", "Сенімді жеткізу", "Тек дыбыс", "Ретсіз", "Тек видео"], options_ru: ["Всегда быстрее", "Надёжную доставку", "Только звук", "Без порядка", "Только видео"], correct: 1 },
+        { text_kz: "Сыртқы CSS қосу:", text_ru: "Подключение внешнего CSS:", options_kz: ["<script>", "<link rel=\"stylesheet\">", "<css>", "<import>", "<style href>"], options_ru: ["<script>", "<link rel=\"stylesheet\">", "<css>", "<import>", "<style href>"], correct: 1 },
+        { text_kz: "const в JavaScript:", text_ru: "const в JavaScript:", options_kz: ["Қайта тағайындалады", "Қайта тағайындалмайды", "Тек сан", "Тек цикл", "SQL"], options_ru: ["Переназначается", "Не переназначается", "Только число", "Только цикл", "SQL"], correct: 1 },
+        { text_kz: "REST-те ресурс жою:", text_ru: "Удаление ресурса в REST:", options_kz: ["GET", "POST", "PUT", "DELETE", "PATCH"], options_ru: ["GET", "POST", "PUT", "DELETE", "PATCH"], correct: 3 },
+        { text_kz: "Кезек (queue) принципі:", text_ru: "Принцип очереди:", options_kz: ["LIFO", "FIFO", "Random", "Heap", "Graph"], options_ru: ["LIFO", "FIFO", "Random", "Куча", "Граф"], correct: 1 },
+        { text_kz: "Бинарлық іздеу шарты:", text_ru: "Условие бинарного поиска:", options_kz: ["Кез келген", "Сұрыпталған массив", "Бос", "JSON", "Кесте"], options_ru: ["Любой", "Отсортированный массив", "Пустой", "JSON", "Таблица"], correct: 1 },
+        { text_kz: "flexbox justify-content:", text_ru: "justify-content во flexbox:", options_kz: ["align-items", "justify-content", "flex-wrap", "order", "gap-v"], options_ru: ["align-items", "justify-content", "flex-wrap", "order", "gap-v"], correct: 1 },
+        { text_kz: "SQL injection қорғанысы:", text_ru: "Защита от SQL injection:", options_kz: ["String қосу", "Prepared statements", "Тек GET", "CSS", "Кэш өшіру"], options_ru: ["Конкатенация", "Prepared statements", "Только GET", "CSS", "Без кэша"], correct: 1 },
+        { text_kz: "HTTP 404:", text_ru: "HTTP 404:", options_kz: ["Сәтті", "Табылмады", "Сервер қате", "Рұқсат жоқ", "Timeout"], options_ru: ["Успех", "Не найдено", "Ошибка сервера", "Нет доступа", "Таймаут"], correct: 1 },
+        { text_kz: "HTML5 семантикалық тег:", text_ru: "Семантический тег HTML5:", options_kz: ["<div>", "<span>", "<article>", "<font>", "<center>"], options_ru: ["<div>", "<span>", "<article>", "<font>", "<center>"], correct: 2 },
+        { text_kz: "Массивке push():", text_ru: "push() в массив:", options_kz: ["push()", "pop()", "shift()", "unshift()", "slice()"], options_ru: ["push()", "pop()", "shift()", "unshift()", "slice()"], correct: 0 },
+        { text_kz: "display:none:", text_ru: "display:none:", options_kz: ["Көрінеді", "Жасырылған, орын алмайды", "Мөлдір", "Қате", "Басып шығару"], options_ru: ["Виден", "Скрыт, не занимает место", "Прозрачный", "Ошибка", "Печать"], correct: 1 },
+        { text_kz: "SHA-256:", text_ru: "SHA-256:", options_kz: ["Сурет", "Хештеу", "Дыбыс", "Түс", "Тег"], options_ru: ["Изображение", "Хеширование", "Звук", "Цвет", "Тег"], correct: 1 },
+        { text_kz: "Бинарлық ағашта балалар:", text_ru: "Детей в бинарном дереве макс:", options_kz: ["1", "2", "3", "4", "∞"], options_ru: ["1", "2", "3", "4", "∞"], correct: 1 },
+        { text_kz: "Кэштеу мақсаты:", text_ru: "Цель кэширования:", options_kz: ["Қауіпсіздікті төмендету", "Жылдамдық", "Жою", "Дизайн", "Аудио"], options_ru: ["Снизить безопасность", "Ускорение", "Удаление", "Дизайн", "Аудио"], correct: 1 }
+      ];
+
+      function shuffleOptions(correctText, wrongPool) {
+        const combined = [correctText, ...wrongPool.slice(0, 4)];
+        for (let i = combined.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [combined[i], combined[j]] = [combined[j], combined[i]];
+        }
+        return { options: combined, correct: combined.indexOf(correctText) };
+      }
+
+      const questions = [];
+      staticBank.forEach((q, idx) => {
+        questions.push({ id: idx + 1, text_kz: q.text_kz, text_ru: q.text_ru, options_kz: q.options_kz, options_ru: q.options_ru, correct: q.correct });
+      });
+
+      const baseId = staticBank.length;
+      for (let k = 0; k < 100 - baseId; k++) {
+        const i = k;
+        let part;
+        if (k % 3 === 0) {
+          const n = 3 + (i % 5);
+          const val = Math.pow(2, n);
+          const pool = [String(val), String(val + 1), String(val * 2), String(val - 2), String(val + 10)];
+          const w = shuffleOptions(pool[0], pool.slice(1));
+          part = { text_kz: `2^${n} = ?`, text_ru: `2^${n} = ?`, options_kz: w.options, options_ru: w.options, correct: w.correct };
+        } else if (k % 3 === 1) {
+          const a = 2 + (i % 7), b = 3 + (i % 6), sum = a + b;
+          const pool = [String(sum), String(sum + 1), String(sum - 1), String(sum + 2), String(sum + 10)];
+          const w = shuffleOptions(pool[0], pool.slice(1));
+          part = { text_kz: `${a} + ${b} = ?`, text_ru: `${a} + ${b} = ?`, options_kz: w.options, options_ru: w.options, correct: w.correct };
+        } else {
+          const ports = [22, 25, 53, 80, 443, 3306, 8080];
+          const p = ports[i % ports.length];
+          const map = { 22: ["SSH", "HTTP", "FTP", "DNS", "SMTP"], 25: ["SMTP", "HTTP", "SSH", "DNS", "FTP"], 53: ["DNS", "HTTP", "SSH", "FTP", "SMTP"], 80: ["HTTP", "HTTPS", "SSH", "FTP", "DNS"], 443: ["HTTPS", "HTTP", "FTP", "SSH", "DNS"], 3306: ["MySQL", "PostgreSQL", "HTTP", "SSH", "DNS"], 8080: ["HTTP (альт.)", "HTTPS", "SSH", "DNS", "SMTP"] };
+          const opts = map[p] || ["A", "B", "C", "D", "E"];
+          const w = shuffleOptions(opts[0], opts.slice(1));
+          part = { text_kz: `Порт ${p} әдетте қай қызметке?`, text_ru: `Порт ${p} обычно для какой службы?`, options_kz: w.options, options_ru: w.options, correct: w.correct };
+        }
+        questions.push({ id: baseId + k + 1, ...part });
+      }
+      window.QUESTIONS_BANK = { questions };
+    })();
+    </script>
+
+    <script>
+    (function () {
+      "use strict";
+      const QUIZ_TOTAL = 20;
+      const QUIZ_MS = 40 * 60 * 1000;
+      const PASS_PERCENT = 50;
+      const POINTS = 100 / QUIZ_TOTAL;
+      const WARN_MS = 5 * 60 * 1000;
+
+      const GROUPS = ["БҚ-11", "БҚ-12", "БҚ-21", "БҚ-22", "БҚ-31", "ЕТАЖ-11", "ЕТАЖ-12", "ЕТАЖ-21", "ЕТАЖ-22", "ЕТАЖ-31", "IT-201", "IT-202"];
+      const COURSES = [{ v: "1", kz: "1-курс", ru: "1 курс" }, { v: "2", kz: "2-курс", ru: "2 курс" }, { v: "3", kz: "3-курс", ru: "3 курс" }];
+      const SPECIALTIES = [
+        { v: "sw", kz: "Бағдарламалық қамтамасыз ету", ru: "Программное обеспечение" },
+        { v: "cein", kz: "Есептеу техникасы және ақпараттық желілер", ru: "Вычислительная техника и информационные сети" }
+      ];
+
+      const i18n = {
+        kz: {
+          welcomeTitle: "Информатика / бағдарламалау тесті",
+          welcomeSub: "Университет студенттеріне арналған онлайн емтихан",
+          labelName: "Толық аты-жөні", labelGroup: "Топ", labelCourse: "Курс", labelSpec: "Мамандық",
+          phName: "Ахметов Азамат", phGroup: "Таңдаңыз...", phCourse: "Таңдаңыз...", phSpec: "Таңдаңыз...",
+          btnStart: "Тестті бастау", questionWord: "Сұрақ", btnBack: "Артқа", btnNext: "Келесі", btnFinish: "Аяқтау",
+          progressDone: "аяқталды", resultPass: "Тесттен өттіңіз!", resultPassSub: "Құттықтаймыз! Жақсы нәтиже.",
+          resultFail: "Тесттен өтпедіңіз", resultFailSub: "Келесі жолы сәттілік тілейміз. Қателермен жұмыс жасаңыз.",
+          scoreLabel: "Жалпы ұпай", ratio: "Дұрыс / Қате", reviewTitle: "Қате берілген жауаптарды талдау",
+          yourWrong: "СІЗДІҢ ЖАУАБЫҢЫЗ (ҚАТЕ)", correctAns: "ДҰРЫС ЖАУАП", points: "ұпай",
+          reviewEmpty: "Барлық жауаптар дұрыс!", btnHome: "Негізгі бетке оралу", btnLogout: "Жүйеден шығу",
+          errName: "Аты-жөніңізді енгізіңіз.", errGroup: "Топты таңдаңыз.", errCourse: "Курсты таңдаңыз.",
+          errSpec: "Мамандықты таңдаңыз.", errBank: "Сұрақтар жүктелмеді.", errFew: "Сұрақтар жеткіліксіз."
+        },
+        ru: {
+          welcomeTitle: "Тест по информатике / программированию",
+          welcomeSub: "Онлайн-экзамен для студентов университета",
+          labelName: "ФИО", labelGroup: "Группа", labelCourse: "Курс", labelSpec: "Специальность",
+          phName: "Иванов Иван", phGroup: "Выберите...", phCourse: "Выберите...", phSpec: "Выберите...",
+          btnStart: "Начать тест", questionWord: "Вопрос", btnBack: "Назад", btnNext: "Далее", btnFinish: "Завершить",
+          progressDone: "завершено", resultPass: "Вы прошли тест!", resultPassSub: "Поздравляем! Хороший результат.",
+          resultFail: "Тест не пройден", resultFailSub: "Удачи в следующий раз. Разберите ошибки.",
+          scoreLabel: "Общий балл", ratio: "Верно / Неверно", reviewTitle: "Разбор неверных ответов",
+          yourWrong: "ВАШ ОТВЕТ (НЕВЕРНО)", correctAns: "ПРАВИЛЬНЫЙ ОТВЕТ", points: "баллов",
+          reviewEmpty: "Все ответы верны!", btnHome: "На главную", btnLogout: "Выйти",
+          errName: "Введите ФИО.", errGroup: "Выберите группу.", errCourse: "Выберите курс.",
+          errSpec: "Выберите специальность.", errBank: "Вопросы не загружены.", errFew: "Недостаточно вопросов."
+        }
+      };
+
+      let lang = "kz";
+      try { if (localStorage.getItem("quiz_lang") === "ru") lang = "ru"; } catch (e) {}
+
+      const bank = (window.QUESTIONS_BANK && window.QUESTIONS_BANK.questions) || [];
+      let student = {}, sessionQuestions = [], answers = [], currentIndex = 0;
+      let deadline = 0, timerId = null, sessionEnded = false;
+
+      const $ = (id) => document.getElementById(id);
+      const el = {
+        formStart: $("form-start"), formError: $("form-error"),
+        inputName: $("input-name"), selectGroup: $("select-group"),
+        selectCourse: $("select-course"), selectSpec: $("select-spec"),
+        screenWelcome: $("screen-welcome"), screenQuiz: $("screen-quiz"), screenResults: $("screen-results"),
+        hdrName: $("hdr-name"), hdrMeta: $("hdr-meta"), hdrSpec: $("hdr-spec"),
+        avatar: $("avatar-initials"), qCurrent: $("q-current"), qTotal: $("q-total"),
+        progressFill: $("progress-fill"), progressPct: $("progress-pct"),
+        timerDisplay: $("timer-display"), timerBox: $("timer-box"),
+        questionText: $("question-text"), optionsRoot: $("options-root"),
+        btnBack: $("btn-back"), btnNext: $("btn-next"),
+        resultIcon: $("result-icon"), resultTitle: $("result-title"), resultSub: $("result-sub"),
+        scoreBig: $("score-big"), ratioLine: $("ratio-line"),
+        reviewBlockTitle: $("review-block-title"), reviewList: $("review-list"),
+        resName: $("res-name"), resMeta: $("res-meta"), resAvatar: $("res-avatar"),
+        btnHome: $("btn-home"), btnLogout: $("btn-logout")
+      };
+
+      function t(k) { return (i18n[lang] && i18n[lang][k]) || k; }
+      function shuffle(a) {
+        const x = a.slice();
+        for (let i = x.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [x[i], x[j]] = [x[j], x[i]];
+        }
+        return x;
+      }
+      function initials(name) {
+        const p = name.trim().split(/\s+/).filter(Boolean);
+        if (!p.length) return "?";
+        if (p.length === 1) return p[0].slice(0, 2).toUpperCase();
+        return (p[0][0] + p[1][0]).toUpperCase();
+      }
+      function getQText(q) { return lang === "kz" ? q.text_kz : q.text_ru; }
+      function getOpts(q) { return lang === "kz" ? q.options_kz : q.options_ru; }
+      function labelCourse(v) {
+        const c = COURSES.find((x) => x.v === v);
+        return c ? (lang === "kz" ? c.kz : c.ru) : v;
+      }
+      function labelSpec(v) {
+        const s = SPECIALTIES.find((x) => x.v === v);
+        return s ? (lang === "kz" ? s.kz : s.ru) : v;
+      }
+      function metaLine() {
+        return `${student.group} • ${labelCourse(student.course)}`;
+      }
+
+      function applyLang() {
+        document.documentElement.lang = lang === "kz" ? "kk" : "ru";
+        document.querySelectorAll("[data-i18n]").forEach((n) => {
+          const k = n.getAttribute("data-i18n");
+          if (k) n.textContent = t(k);
+        });
+        document.querySelectorAll("[data-i18n-placeholder]").forEach((n) => {
+          const k = n.getAttribute("data-i18n-placeholder");
+          if (k) n.placeholder = t(k);
+        });
+        fillSelects();
+        document.querySelectorAll(".lang-btn").forEach((b) => {
+          b.classList.toggle("active", b.getAttribute("data-lang") === lang);
+        });
+      }
+
+      function fillSelects() {
+        const gv = el.selectGroup.value, cv = el.selectCourse.value, sv = el.selectSpec.value;
+        el.selectGroup.innerHTML = `<option value="">${t("phGroup")}</option>`;
+        GROUPS.forEach((g) => {
+          const o = document.createElement("option");
+          o.value = g; o.textContent = g;
+          el.selectGroup.appendChild(o);
+        });
+        el.selectCourse.innerHTML = `<option value="">${t("phCourse")}</option>`;
+        COURSES.forEach((c) => {
+          const o = document.createElement("option");
+          o.value = c.v; o.textContent = lang === "kz" ? c.kz : c.ru;
+          el.selectCourse.appendChild(o);
+        });
+        el.selectSpec.innerHTML = `<option value="">${t("phSpec")}</option>`;
+        SPECIALTIES.forEach((s) => {
+          const o = document.createElement("option");
+          o.value = s.v; o.textContent = lang === "kz" ? s.kz : s.ru;
+          el.selectSpec.appendChild(o);
+        });
+        if ([...el.selectGroup.options].some((o) => o.value === gv)) el.selectGroup.value = gv;
+        if ([...el.selectCourse.options].some((o) => o.value === cv)) el.selectCourse.value = cv;
+        if ([...el.selectSpec.options].some((o) => o.value === sv)) el.selectSpec.value = sv;
+      }
+
+      function showScreen(which) {
+        [["welcome", el.screenWelcome], ["quiz", el.screenQuiz], ["results", el.screenResults]].forEach(([k, node]) => {
+          const on = k === which;
+          node.hidden = !on;
+          node.classList.toggle("active", on);
+        });
+      }
+
+      function formatTime(ms) {
+        const s = Math.max(0, Math.floor(ms / 1000));
+        return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+      }
+      function stopTimer() { if (timerId) { clearInterval(timerId); timerId = null; } }
+      function startTimer() {
+        stopTimer();
+        deadline = Date.now() + QUIZ_MS;
+        const tick = () => {
+          const left = Math.max(0, deadline - Date.now());
+          el.timerDisplay.textContent = formatTime(left);
+          el.timerBox.classList.toggle("warn", left <= WARN_MS && left > 0);
+          if (left === 0) finishQuiz();
+        };
+        tick();
+        timerId = setInterval(tick, 1000);
+      }
+
+      function renderQuestion() {
+        const q = sessionQuestions[currentIndex];
+        const n = currentIndex + 1;
+        el.qCurrent.textContent = n;
+        el.qTotal.textContent = QUIZ_TOTAL;
+        const pct = Math.round((n / QUIZ_TOTAL) * 100);
+        el.progressFill.style.width = pct + "%";
+        el.progressPct.textContent = pct + "% " + t("progressDone");
+        el.questionText.textContent = getQText(q);
+        el.optionsRoot.innerHTML = "";
+        const opts = getOpts(q);
+        const saved = answers[currentIndex];
+        opts.forEach((text, idx) => {
+          const lab = document.createElement("label");
+          lab.className = "option" + (saved === idx ? " selected" : "");
+          const inp = document.createElement("input");
+          inp.type = "radio";
+          inp.name = "answer";
+          inp.checked = saved === idx;
+          const span = document.createElement("span");
+          span.textContent = text;
+          lab.appendChild(inp);
+          lab.appendChild(span);
+          lab.addEventListener("click", () => {
+            answers[currentIndex] = idx;
+            el.optionsRoot.querySelectorAll(".option").forEach((o) => o.classList.remove("selected"));
+            lab.classList.add("selected");
+            inp.checked = true;
+            el.btnNext.disabled = false;
+          });
+          el.optionsRoot.appendChild(lab);
+        });
+        el.btnBack.disabled = currentIndex === 0;
+        el.btnNext.disabled = saved == null;
+        el.btnNext.textContent = t(currentIndex === QUIZ_TOTAL - 1 ? "btnFinish" : "btnNext");
+      }
+
+      function validateForm() {
+        el.formError.hidden = true;
+        if (!el.inputName.value.trim()) { el.formError.textContent = t("errName"); el.formError.hidden = false; return false; }
+        if (!el.selectGroup.value) { el.formError.textContent = t("errGroup"); el.formError.hidden = false; return false; }
+        if (!el.selectCourse.value) { el.formError.textContent = t("errCourse"); el.formError.hidden = false; return false; }
+        if (!el.selectSpec.value) { el.formError.textContent = t("errSpec"); el.formError.hidden = false; return false; }
+        return true;
+      }
+
+      function beginSession() {
+        if (bank.length < QUIZ_TOTAL) {
+          el.formError.textContent = t(bank.length ? "errFew" : "errBank");
+          el.formError.hidden = false;
+          return;
+        }
+        sessionEnded = false;
+        student = {
+          name: el.inputName.value.trim(),
+          group: el.selectGroup.value,
+          course: el.selectCourse.value,
+          spec: el.selectSpec.value
+        };
+        sessionQuestions = shuffle(bank).slice(0, QUIZ_TOTAL);
+        answers = Array(QUIZ_TOTAL).fill(null);
+        currentIndex = 0;
+        const ini = initials(student.name);
+        el.avatar.textContent = ini;
+        el.hdrName.textContent = student.name;
+        el.hdrMeta.textContent = metaLine();
+        el.hdrSpec.textContent = labelSpec(student.spec);
+        showScreen("quiz");
+        startTimer();
+        renderQuestion();
+      }
+
+      function finishQuiz() {
+        if (sessionEnded) return;
+        sessionEnded = true;
+        stopTimer();
+        let correct = 0;
+        const wrongItems = [];
+        for (let i = 0; i < QUIZ_TOTAL; i++) {
+          const q = sessionQuestions[i];
+          const a = answers[i];
+          const ok = a != null && Number(a) === q.correct;
+          if (ok) correct++;
+          else {
+            const opts = getOpts(q);
+            wrongItems.push({
+              num: q.id || i + 1,
+              text: getQText(q),
+              user: a != null ? opts[a] : (lang === "kz" ? "Жауап берілмеді" : "Нет ответа"),
+              right: opts[q.correct]
+            });
+          }
+        }
+        const wrong = QUIZ_TOTAL - correct;
+        const score = Math.round(correct * POINTS);
+        const percent = Math.round((correct / QUIZ_TOTAL) * 100);
+        const passed = percent >= PASS_PERCENT;
+
+        const ini = initials(student.name);
+        el.resAvatar.textContent = ini;
+        el.resName.textContent = student.name;
+        el.resMeta.textContent = metaLine();
+
+        el.resultIcon.textContent = passed ? "✓" : "✕";
+        el.resultIcon.className = "result-icon " + (passed ? "pass" : "fail");
+        el.resultTitle.textContent = t(passed ? "resultPass" : "resultFail");
+        el.resultSub.textContent = t(passed ? "resultPassSub" : "resultFailSub");
+        el.scoreBig.textContent = t("scoreLabel") + " " + score + "/100";
+        el.scoreBig.className = "score-line " + (passed ? "pass" : "fail");
+        el.ratioLine.textContent = t("ratio") + " " + correct + " / " + wrong;
+
+        el.reviewList.innerHTML = "";
+        if (wrongItems.length) {
+          el.reviewBlockTitle.hidden = false;
+          wrongItems.forEach((item, idx) => {
+            const card = document.createElement("article");
+            card.className = "review-card";
+            card.innerHTML =
+              '<div class="review-head"><span>' + t("questionWord").toUpperCase() + " " + (idx + 1) + '</span><span>0 ' + t("points") + "</span></div>" +
+              '<p class="review-q">' + escapeHtml(item.text) + "</p>" +
+              '<div class="ans-box ans-wrong"><span class="ans-label">' + t("yourWrong") + "</span>" + escapeHtml(item.user) + "</div>" +
+              '<div class="ans-box ans-correct"><span class="ans-label">' + t("correctAns") + "</span>" + escapeHtml(item.right) + "</div>";
+            el.reviewList.appendChild(card);
+          });
+        } else {
+          el.reviewBlockTitle.hidden = true;
+          el.reviewList.innerHTML = '<p class="review-empty">' + t("reviewEmpty") + "</p>";
+        }
+        showScreen("results");
+      }
+
+      function escapeHtml(s) {
+        const d = document.createElement("div");
+        d.textContent = s;
+        return d.innerHTML;
+      }
+
+      function goHome() {
+        el.formStart.reset();
+        fillSelects();
+        stopTimer();
+        sessionEnded = false;
+        showScreen("welcome");
+      }
+
+      el.formStart.addEventListener("submit", (e) => { e.preventDefault(); if (validateForm()) beginSession(); });
+      el.btnBack.addEventListener("click", () => { if (currentIndex > 0) { currentIndex--; renderQuestion(); } });
+      el.btnNext.addEventListener("click", () => {
+        if (answers[currentIndex] == null) return;
+        if (currentIndex < QUIZ_TOTAL - 1) { currentIndex++; renderQuestion(); }
+        else finishQuiz();
+      });
+      el.btnHome.addEventListener("click", goHome);
+      el.btnLogout.addEventListener("click", goHome);
+      document.getElementById("lang-switch").addEventListener("click", (e) => {
+        const btn = e.target.closest(".lang-btn");
+        if (!btn) return;
+        lang = btn.getAttribute("data-lang") === "ru" ? "ru" : "kz";
+        try { localStorage.setItem("quiz_lang", lang); } catch (err) {}
+        applyLang();
+        if (!el.screenQuiz.hidden) {
+          el.hdrMeta.textContent = metaLine();
+          el.hdrSpec.textContent = labelSpec(student.spec);
+          renderQuestion();
+        }
+        if (!el.screenResults.hidden) {
+          sessionEnded = false;
+          finishQuiz();
+        }
+      });
+
+      applyLang();
+      showScreen("welcome");
+    })();
+    </script>
+  </body>
+</html>
